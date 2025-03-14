@@ -69,40 +69,55 @@ int checkCollision(int board[20][10], int *posX, int *posY) {
     return 1; 
 }
 
-void checkLine(int fixed[20][10]) {
-    int check;
+void checkLine(int fixed[20][10], int board[20][10]) {
     for (int y = 0; y < 20; y++) {
-        check = 0;
-        for (int x = 0; x < 10; x++) {
-            if (fixed[y][x] == 2) check++;
-        }
-        if (check == 10) {
+        int check = 0;
 
+        for (int x = 0; x < 10; x++) {
+            if (fixed[y][x] == 1) check++;
+        }
+
+        if (check == 10) {
+            for (int x = 0; x < 10; x++) {
+                fixed[y][x] = 0;
+                board[y][x] = 0;
+            }
+            for (int y2 = y; y2 > 0; y2--) {
+                for (int x2 = 0; x2 < 10; x2++) {
+                    fixed[y2][x2] = fixed[y2 - 1][x2];
+                    board[y2][x2] = board[y2 - 1][x2]; 
+                }
+            }
+
+            for (int x = 0; x < 10; x++) {
+                fixed[0][x] = 0;
+                board[0][x] = 0;
+            }
         }
     }
 }
 
 void gameLoop(int board[20][10], int *posX, int *posY, int fixed[20][10]) {
-
     if (*posY >= 19 || checkCollision(board, posX, posY)) {
-        fixed[*posY][*posX] = 2;
+        fixed[*posY][*posX] = 1;
         board[*posY][*posX] = 1;
         *posX = 4;
         *posY = 0;
     }
     else (*posY)++;
+    checkLine(fixed, board);
     generateNewBlock(board, posX, posY);
     drawPlayingBoard(board);
 
     for (int y = 0; y < 20; y++) {
         for (int x = 0; x < 10; x++) {
-            if (board[y][x] == 1 && fixed[y][x] != 2) {
+            if (board[y][x] == 1 && fixed[y][x] != 1) {
                 board[y][x] = 0;
             }
         }
     }
 
-    Sleep(250);
+    Sleep(100);
 }
 
 int main() {
