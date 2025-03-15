@@ -95,70 +95,70 @@ void rotateBlock(Block *block) {
 void processInput(int fixed[20][10], int* posX, int* posY, Block *block) {
     int ok = 1;
 
-    if (kbhit()) {
-        char key = getch();
-
-        if (key == 'a') { 
-            ok = 1;
-            for (int y = 0; y < block -> size; y++) {
-                for (int x = 0; x < block -> size; x++) {
-                    if (block -> shape[y][x] == 1) {
-                        int boardX = *posX + x;
-                        int boardY = *posY + y;
-                        if (boardX - 1 < 0 || fixed[boardY][boardX - 1] == 1) {
-                            ok = 0;
-                        }
+    if (GetAsyncKeyState('A') & 0x8000) {
+        for (int y = 0; y < block -> size; y++) {
+            for (int x = 0; x < block -> size; x++) {
+                if (block -> shape[y][x] == 1) {
+                    int boardX = *posX + x;
+                    int boardY = *posY + y;
+                    if (boardX - 1 < 0) {
+                        ok = 0;
+                    }
+                    if (fixed[boardY][boardX - 1] == 1) {
+                        ok = 0;
                     }
                 }
             }
-            if (ok) (*posX)--;
         }
+        if (ok) (*posX)--;
+    }
 
-        if (key == 'd') { 
-            ok = 1;
-            for (int y = 0; y < block -> size; y++) {
-                for (int x = 0; x < block -> size; x++) {
-                    if (block -> shape[y][x] == 1) {
-                        int boardX = *posX + x;
-                        int boardY = *posY + y;
-                        if (boardX + 1 > 9 || fixed[boardY][boardX + 1] == 1) {
-                            ok = 0;
-                        }
+    if (GetAsyncKeyState('D') & 0x8000) {
+        ok = 1;
+        for (int y = 0; y < block -> size; y++) {
+            for (int x = 0; x < block -> size; x++) {
+                if (block -> shape[y][x] == 1) {
+                    int boardX = *posX + x;
+                    int boardY = *posY + y;
+                    if (boardX + 1 > 9) {
+                        ok = 0;
+                    }
+                    if (fixed[boardY][boardX + 1] == 1) {
+                        ok = 0;
                     }
                 }
             }
-            if (ok) (*posX)++;
         }
+        if (ok) (*posX)++;
+    }
 
-        if (key == 'w') { 
-            Block temp = *block;
-            rotateBlock(&temp);
+    if (GetAsyncKeyState('W') & 0x8000) {
+        rotateBlock(block);
+    }
 
-            ok = 1;
-            for (int y = 0; y < temp.size; y++) {
-                for (int x = 0; x < temp.size; x++) {
-                    if (temp.shape[y][x] == 1) {
-                        int boardX = *posX + x;
-                        int boardY = *posY + y;
-                        if (boardX < 0 || boardX >= 10 || boardY >= 20 || fixed[boardY][boardX] == 1) {
-                            ok = 0;
-                        }
+    if (GetAsyncKeyState('S') & 0x8000) {
+        ok = 1;
+        for (int y = 0; y < block -> size; y++) {
+            for (int x = 0; x < block -> size; x++) {
+                if (block -> shape[y][x] == 1) {
+                    int boardX = *posX + x;
+                    int boardY = *posY + y;
+                    if (boardX + 1 > 9) {
+                        ok = 0;
+                    }
+                    if (fixed[boardY + 1][boardX] == 1) {
+                        ok = 0;
                     }
                 }
             }
-            if (ok) *block = temp;
         }
+        if (ok) (*posY)++;
+    }
 
-            // if (key == 's') {
-            //     (*posY)++;
-            // }
-
-        if (key == 'q') {
-            exit(0);
-        }
+    if (GetAsyncKeyState('Q') & 0x8000) {
+        exit(0);
     }
 }
-
 
 void generateNewBlock(int board[20][10], int *posX, int *posY, Block block) {
     for (int y = 0; y < block.size; y++) {
