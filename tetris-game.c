@@ -7,6 +7,7 @@
 #define RESET "\033[0m"
 #define WHTB "\e[47m"
 #define BLUE "\033[34m"
+#define WHTHB "\e[0;107m"
 
 typedef struct {
     int shape[4][4];
@@ -63,9 +64,9 @@ void drawPlayingBoard(int board[20][10]) {
 
         for (int x = 0; x < 10; x++) {
             if (board[y][x] == 0) {
-                printf(".");
+                printf(WHTHB "  " RESET);
             } else {
-                printf("#");
+                printf(WHTB "# " RESET);
             }
         }
         printf("\n");
@@ -94,52 +95,67 @@ void rotateBlock(Block *block) {
 void processInput(int fixed[20][10], int* posX, int* posY, Block *block) {
     int ok = 1;
 
-    if (GetAsyncKeyState('A') & 0x8000) {
-        for (int y = 0; y < block -> size; y++) {
-            for (int x = 0; x < block -> size; x++) {
-                if (block -> shape[y][x] == 1) {
-                    int boardX = *posX + x;
-                    if (boardX - 1 < 0) {
-                        ok = 0;
-                    }
-                    if (fixed[*posY][boardX - 1] == 1) {
-                        ok = 0;
-                    }
-                }
-            }
-        }
-        if (ok) (*posX)--;
-    }
+    if (kbhit()) {
+        char key = getch();
 
-    if (GetAsyncKeyState('D') & 0x8000) {
-        ok = 1;
-        for (int y = 0; y < block -> size; y++) {
-            for (int x = 0; x < block -> size; x++) {
-                if (block -> shape[y][x] == 1) {
-                    int boardX = *posX + x;
-                    if (boardX + 1 > 9) {
-                        ok = 0;
-                    }
-                    if (fixed[*posY][boardX + 1] == 1) {
-                        ok = 0;
+        if (key == 'a') { 
+            ok = 1;
+            for (int y = 0; y < block -> size; y++) {
+                for (int x = 0; x < block -> size; x++) {
+                    if (block -> shape[y][x] == 1) {
+                        int boardX = *posX + x;
+                        int boardY = *posY + y;
+                        if (boardX - 1 < 0 || fixed[boardY][boardX - 1] == 1) {
+                            ok = 0;
+                        }
                     }
                 }
             }
+            if (ok) (*posX)--;
         }
-        if (ok) (*posX)++;
-    }
 
-    if (GetAsyncKeyState('W') & 0x8000) {
-        rotateBlock(block);
-    }
+        if (key == 'd') { 
+            ok = 1;
+            for (int y = 0; y < block -> size; y++) {
+                for (int x = 0; x < block -> size; x++) {
+                    if (block -> shape[y][x] == 1) {
+                        int boardX = *posX + x;
+                        int boardY = *posY + y;
+                        if (boardX + 1 > 9 || fixed[boardY][boardX + 1] == 1) {
+                            ok = 0;
+                        }
+                    }
+                }
+            }
+            if (ok) (*posX)++;
+        }
 
-    if (GetAsyncKeyState('S') & 0x8000) {
-        (*posY)++;
-        Sleep(50);
-    }
+        if (key == 'w') { 
+            Block temp = *block;
+            rotateBlock(&temp);
 
-    if (GetAsyncKeyState('Q') & 0x8000) {
-        exit(0);
+            ok = 1;
+            for (int y = 0; y < temp.size; y++) {
+                for (int x = 0; x < temp.size; x++) {
+                    if (temp.shape[y][x] == 1) {
+                        int boardX = *posX + x;
+                        int boardY = *posY + y;
+                        if (boardX < 0 || boardX >= 10 || boardY >= 20 || fixed[boardY][boardX] == 1) {
+                            ok = 0;
+                        }
+                    }
+                }
+            }
+            if (ok) *block = temp;
+        }
+
+            // if (key == 's') {
+            //     (*posY)++;
+            // }
+
+        if (key == 'q') {
+            exit(0);
+        }
     }
 }
 
@@ -213,7 +229,7 @@ void gameLoop(int board[20][10], int *posX, int *posY, int fixed[20][10], Block 
                 if (block -> shape[y][x] == 1) {
                     int boardY = *posY + y;
                     int boardX = *posX + x;
-    
+                    
                     if (boardY < 20 && boardX < 10 && boardY >= 0 && boardX >= 0) {
                         fixed[boardY][boardX] = 1;
                         board[boardY][boardX] = 1;

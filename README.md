@@ -1,2 +1,4 @@
-# tetris-c
-Basic Tetris game in C
+# Tetris
+A tetris game in C for windows terminal.
+
+
