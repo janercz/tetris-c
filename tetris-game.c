@@ -275,23 +275,33 @@ void gameLoop(int board[20][10], int *posX, int *posY, int fixed[20][10], Block 
 int main() {
     srand((unsigned int)time(NULL));
 
-    printf("PRESS ANY KEY TO PLAY...\n");
+    printf("PRESS ENTER TO PLAY...\n");
     while (1) {
-        _getch();
+        while (1) {
+            char key = _getch();
+            if (key == 13) {
+                break;
+            }
+        }
         system("cls"); 
-
         int board[20][10] = {0};
         int fixed[20][10] = {0};
         int posX = 4, posY = 0;
         int score = 0;
         Block block = blocks[rand() % 7];
-
         gameLoop(board, &posX, &posY, fixed, &block, &score);
-        system("cls"); 
         Sleep(1000);
-        printf("YOU LOST\n");
-        printf("PRESS ANY KEY TO PLAY AGAIN OR 'Q' TO QUIT...\n");
-        _getch();
+        printf("\n\nYOU LOST\n");
+        printf("PRESS ENTER TO PLAY AGAIN...\n");
+
+        while (1) {
+            char key = _getch();
+            if (key == 'Q' || key == 'q') {
+                exit(0);
+            }
+            else if (key) {
+                break;
+            }
+        }
     }
-    
 }
