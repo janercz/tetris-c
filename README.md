@@ -9,4 +9,4 @@ A tetris game in C build for windows terminal.
 ##### Q - Quit game
 
 ## Preview
-![Popis obrázku](images/tetris.png)
+!(images/tetris.png)
