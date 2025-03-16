@@ -2,11 +2,11 @@
 A tetris game in C build for windows terminal.
 
 ## Binds
-#### W
+###### W
 Rotate
-#### A
+###### A
 Move left
-#### D
+###### D
 Move right
-#### S
+###### S
 Move down faster
