@@ -30,9 +30,9 @@ Block blocks[7] = {{{
     {1, 1, 0, 0},
     {0, 0, 0, 0}
 }, 3}, {{
-    {0, 0, 1, 0},
-    {0, 0, 1, 0},
-    {0, 1, 1, 0},
+    {0, 1, 0, 0},
+    {0, 1, 0, 0},
+    {1, 1, 0, 0},
     {0, 0, 0, 0}
 }, 3}, {{
     {1, 1, 0, 0},
@@ -133,7 +133,22 @@ void processInput(int fixed[20][10], int* posX, int* posY, Block *block) {
     }
 
     if (GetAsyncKeyState('W') & 0x8000) {
-        rotateBlock(block);
+        Block temp = *block;
+        rotateBlock(&temp);
+
+        ok = 1;
+        for (int y = 0; y < temp.size; y++) {
+            for (int x = 0; x < temp.size; x++) {
+                if (temp.shape[y][x] == 1) {
+                    int boardX = *posX + x;
+                    int boardY = *posY + y;
+                    if (boardX < 0 || boardX >= 10 || boardY >= 20 || fixed[boardY][boardX] == 1) {
+                        ok = 0;
+                    }
+                }
+            }
+        }
+        if (ok) *block = temp;
     }
 
     if (GetAsyncKeyState('S') & 0x8000) {
@@ -160,7 +175,7 @@ void processInput(int fixed[20][10], int* posX, int* posY, Block *block) {
     }
 }
 
-void generateNewBlock(int board[20][10], int *posX, int *posY, Block block) {
+int generateNewBlock(int board[20][10], int *posX, int *posY, Block block) {
     for (int y = 0; y < block.size; y++) {
         for (int x = 0; x < block.size; x++) {
             if (block.shape[y][x] == 1) {
@@ -168,11 +183,17 @@ void generateNewBlock(int board[20][10], int *posX, int *posY, Block block) {
                 int boardX = *posX + x;
 
                 if (boardY < 20 && boardX < 10 && boardY >= 0 && boardX >= 0) {
-                    board[boardY][boardX] = 1;
+                    if (board[boardY][boardX] == 1) {
+                        return 1;
+                    }
+                    else {
+                        board[boardY][boardX] = 1;
+                    }
                 }
             }
         }
     }
+    return 0;
 }
 
 int checkCollision(int board[20][10], int *posX, int *posY, Block *block) {
@@ -222,51 +243,63 @@ void checkLine(int fixed[20][10], int board[20][10]) {
 }
 
 void gameLoop(int board[20][10], int *posX, int *posY, int fixed[20][10], Block *block) {
-    processInput(fixed, posX, posY, block); 
-    if (*posY >= 19 || checkCollision(board, posX, posY, block)) {
-        for (int y = 0; y < block -> size; y++) {
-            for (int x = 0; x < block -> size; x++) {
-                if (block -> shape[y][x] == 1) {
-                    int boardY = *posY + y;
-                    int boardX = *posX + x;
-                    
-                    if (boardY < 20 && boardX < 10 && boardY >= 0 && boardX >= 0) {
-                        fixed[boardY][boardX] = 1;
-                        board[boardY][boardX] = 1;
+    while (1) {
+        processInput(fixed, posX, posY, block); 
+        if (*posY >= 19 || checkCollision(board, posX, posY, block)) {
+            for (int y = 0; y < block -> size; y++) {
+                for (int x = 0; x < block -> size; x++) {
+                    if (block -> shape[y][x] == 1) {
+                        int boardY = *posY + y;
+                        int boardX = *posX + x;
+                        
+                        if (boardY < 20 && boardX < 10 && boardY >= 0 && boardX >= 0) {
+                            fixed[boardY][boardX] = 1;
+                            board[boardY][boardX] = 1;
+                        }
                     }
                 }
             }
+            *block = blocks[rand() % 7];
+            *posX = 4;
+            *posY = 0;
         }
-        *block = blocks[rand() % 7];
-        *posX = 4;
-        *posY = 0;
-    }
-    else (*posY)++;
-    checkLine(fixed, board);
-    generateNewBlock(board, posX, posY, *block);
-    drawPlayingBoard(board);
-
-    for (int y = 0; y < 20; y++) {
-        for (int x = 0; x < 10; x++) {
-            if (board[y][x] == 1 && fixed[y][x] != 1) {
-                board[y][x] = 0;
+        else (*posY)++;
+        checkLine(fixed, board);
+        if (generateNewBlock(board, posX, posY, *block)) {
+            break;
+        }
+        drawPlayingBoard(board);
+    
+        for (int y = 0; y < 20; y++) {
+            for (int x = 0; x < 10; x++) {
+                if (board[y][x] == 1 && fixed[y][x] != 1) {
+                    board[y][x] = 0;
+                }
             }
         }
+        Sleep(120);
     }
 }
 
 int main() {
-    int board[20][10] = {0};
-    int fixed[20][10] = {0};
-    int posX = 4, posY = 0;
     srand((unsigned int)time(NULL));
-    Block block = blocks[rand() % 7];
 
     printf("PRESS ANY KEY TO PLAY...\n");
-    _getch();
-    system("cls"); 
     while (1) {
-        Sleep(120);
-        gameLoop(board, &posX, &posY, fixed, &block); 
+        _getch();
+        system("cls"); 
+
+        int board[20][10] = {0};
+        int fixed[20][10] = {0};
+        int posX = 4, posY = 0;
+        Block block = blocks[rand() % 7];
+
+        gameLoop(board, &posX, &posY, fixed, &block);
+        system("cls"); 
+        Sleep(1000);
+        printf("YOU LOST\n");
+        printf("PRESS ANY KEY TO PLAY AGAIN OR 'Q' TO QUIT...\n");
+        _getch();
     }
+    
 }
