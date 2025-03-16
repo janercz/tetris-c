@@ -92,6 +92,24 @@ void rotateBlock(Block *block) {
     }
 }
 
+int checkCollision(int board[20][10], int *posX, int *posY, Block *block) {
+    int ok = 1;
+    for (int y = 0; y < block -> size; y++) {
+        for (int x = 0; x < block -> size; x++) {
+            if (block -> shape[y][x] == 1) {
+                int boardY = *posY + y;
+                int boardX = *posX + x;
+
+                if (boardY >= 19 || board[boardY + 1][boardX] != 0) {
+                    ok = 0;
+                }
+            }
+        }
+    }
+    if (ok) return 0; 
+    else return 1; 
+}
+
 void processInput(int fixed[20][10], int* posX, int* posY, Block *block) {
     int ok = 1;
 
@@ -152,22 +170,9 @@ void processInput(int fixed[20][10], int* posX, int* posY, Block *block) {
     }
 
     if (GetAsyncKeyState('S') & 0x8000) {
-        ok = 1;
-        for (int y = 0; y < block -> size; y++) {
-            for (int x = 0; x < block -> size; x++) {
-                if (block -> shape[y][x] == 1) {
-                    int boardX = *posX + x;
-                    int boardY = *posY + y;
-                    if (boardX + 1 > 9) {
-                        ok = 0;
-                    }
-                    if (fixed[boardY + 1][boardX] == 1) {
-                        ok = 0;
-                    }
-                }
-            }
+        if (!checkCollision(fixed, posX, posY, block)) {
+            (*posY)++;
         }
-        if (ok) (*posY)++;
     }
 
     if (GetAsyncKeyState('Q') & 0x8000) {
@@ -196,23 +201,6 @@ int generateNewBlock(int board[20][10], int *posX, int *posY, Block block) {
     return 0;
 }
 
-int checkCollision(int board[20][10], int *posX, int *posY, Block *block) {
-    int ok = 1;
-    for (int y = 0; y < block -> size; y++) {
-        for (int x = 0; x < block -> size; x++) {
-            if (block -> shape[y][x] == 1) {
-                int boardY = *posY + y;
-                int boardX = *posX + x;
-
-                if (boardY >= 19 || board[boardY + 1][boardX] != 0) {
-                    ok = 0;
-                }
-            }
-        }
-    }
-    if (ok) return 0; 
-    else return 1; 
-}
 
 void checkLine(int fixed[20][10], int board[20][10]) {
     for (int y = 0; y < 20; y++) {
