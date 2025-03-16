@@ -6,7 +6,7 @@
 
 #define RESET "\033[0m"
 #define WHTB "\e[47m"
-#define BLUE "\033[34m"
+#define YELB "\e[43m"
 #define WHTHB "\e[0;107m"
 
 typedef struct {
@@ -52,7 +52,7 @@ Block blocks[7] = {{{
 }, 3}};
 
 
-void drawPlayingBoard(int board[20][10]) {
+void drawPlayingBoard(int board[20][10], int *score) {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     COORD coord;
 
@@ -64,13 +64,14 @@ void drawPlayingBoard(int board[20][10]) {
 
         for (int x = 0; x < 10; x++) {
             if (board[y][x] == 0) {
-                printf(WHTHB "  " RESET);
+                printf(WHTB "  " RESET);
             } else {
-                printf(WHTB "# " RESET);
+                printf(YELB "  " RESET);
             }
         }
         printf("\n");
     }
+    printf("SCORE: %d", *score);
 }
 
 void rotateBlock(Block *block) {
@@ -202,7 +203,7 @@ int generateNewBlock(int board[20][10], int *posX, int *posY, Block block) {
 }
 
 
-void checkLine(int fixed[20][10], int board[20][10]) {
+void checkLine(int fixed[20][10], int board[20][10], int *score) {
     for (int y = 0; y < 20; y++) {
         int check = 0;
 
@@ -226,11 +227,13 @@ void checkLine(int fixed[20][10], int board[20][10]) {
                 fixed[0][x] = 0;
                 board[0][x] = 0;
             }
+
+            *score = *score + 100;
         }
     }
 }
 
-void gameLoop(int board[20][10], int *posX, int *posY, int fixed[20][10], Block *block) {
+void gameLoop(int board[20][10], int *posX, int *posY, int fixed[20][10], Block *block, int *score) {
     while (1) {
         processInput(fixed, posX, posY, block); 
         if (*posY >= 19 || checkCollision(board, posX, posY, block)) {
@@ -252,11 +255,11 @@ void gameLoop(int board[20][10], int *posX, int *posY, int fixed[20][10], Block 
             *posY = 0;
         }
         else (*posY)++;
-        checkLine(fixed, board);
+        checkLine(fixed, board, score);
         if (generateNewBlock(board, posX, posY, *block)) {
             break;
         }
-        drawPlayingBoard(board);
+        drawPlayingBoard(board, score);
     
         for (int y = 0; y < 20; y++) {
             for (int x = 0; x < 10; x++) {
@@ -280,9 +283,10 @@ int main() {
         int board[20][10] = {0};
         int fixed[20][10] = {0};
         int posX = 4, posY = 0;
+        int score = 0;
         Block block = blocks[rand() % 7];
 
-        gameLoop(board, &posX, &posY, fixed, &block);
+        gameLoop(board, &posX, &posY, fixed, &block, &score);
         system("cls"); 
         Sleep(1000);
         printf("YOU LOST\n");
